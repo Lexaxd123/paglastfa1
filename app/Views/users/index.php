@@ -38,7 +38,7 @@
         <h1 class="page-title">👤 User List</h1>
 
         <p class="page-description">
-            View registered users, their email addresses, and roles.
+            View registered user accounts, their usernames, and when they were created.
         </p>
 
         <?php if (! empty($users)): ?>
@@ -47,9 +47,9 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>User Name</th>
-                            <th>Email Address</th>
-                            <th>Role</th>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Date Created</th>
                         </tr>
                     </thead>
 
@@ -59,22 +59,17 @@
                                 <td><?= $number + 1 ?></td>
 
                                 <td>
-                                    <?= esc($user['name']) ?>
-                                </td>
-
-                                <td>
-                                    <a
-                                        class="email-link"
-                                        href="mailto:<?= esc($user['email']) ?>"
-                                    >
-                                        <?= esc($user['email']) ?>
-                                    </a>
-                                </td>
-
-                                <td>
                                     <span class="role">
-                                        <?= esc($user['role']) ?>
+                                        <?= esc($user['username']) ?>
                                     </span>
+                                </td>
+
+                                <td>
+                                    <?= esc($user['full_name']) ?>
+                                </td>
+
+                                <td>
+                                    <?= esc(date('M d, Y g:i A', strtotime($user['created_at']))) ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

@@ -57,7 +57,7 @@
                                 <td><?= $number + 1 ?></td>
 
                                 <td>
-                                    <?= esc($customer['name']) ?>
+                                    <?= esc($customer['full_name']) ?>
                                 </td>
 
                                 <td>

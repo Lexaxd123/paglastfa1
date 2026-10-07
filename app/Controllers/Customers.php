@@ -2,37 +2,16 @@
 
 namespace App\Controllers;
 
+use App\Models\CustomerModel;
+
 class Customers extends BaseController
 {
     public function index()
     {
-        $data['customers'] = [
-            [
-                'name'  => 'LexaFps',
-                'email' => 'lexafps@example.com',
-                'phone' => '09123456789',
-            ],
-            [
-                'name'  => 'Hitmanreborn',
-                'email' => 'hitmanreborn@example.com',
-                'phone' => '09187654321',
-            ],
-            [
-                'name'  => 'Pedro Omsim',
-                'email' => 'pedro@example.com',
-                'phone' => '09112223344',
-            ],
-            [
-                'name'  => 'Ada Wong',
-                'email' => 'ada@example.com',
-                'phone' => '09998887766',
-            ],
-            [
-                'name'  => 'Zyrah',
-                'email' => 'zyrah@example.com',
-                'phone' => '09001112233',
-            ],
-        ];
+        $customerModel = new CustomerModel();
+
+        // Query Builder: SELECT * FROM customers ORDER BY id ASC
+        $data['customers'] = $customerModel->orderBy('id', 'ASC')->findAll();
 
         return view('customers/index', $data);
     }

@@ -1,69 +1,141 @@
-# CodeIgniter 4 Application Starter
+# Morris POS (CodeIgniter 4 + MySQL)
 
-## What is CodeIgniter?
+IT0049 Web System Technologies, **TFA2: From Arrays to a Real Database**.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+TFA1 stored Customers and Users in static PHP arrays. TFA2 moves that data into a MySQL database. Each page now reads its records through a CodeIgniter **Model** with Query Builder (`findAll()`), not raw SQL.
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+## Pages
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+| Route        | Controller           | Data source                           |
+|--------------|----------------------|---------------------------------------|
+| `/`          | `Pages::index`       | static                                |
+| `/about`     | `Pages::about`       | static                                |
+| `/customers` | `Customers::index`   | `CustomerModel` → `customers` table   |
+| `/users`     | `Users::index`       | `UserModel` → `users` table           |
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+## Project structure (files changed in TFA2)
 
-## Installation & updates
+```
+app/
+├── Controllers/
+│   ├── Customers.php        # now uses CustomerModel->findAll()
+│   └── Users.php            # now uses UserModel->findAll()
+├── Models/
+│   ├── CustomerModel.php    # wraps the customers table
+│   └── UserModel.php        # wraps the users table
+└── Views/
+    ├── customers/index.php  # reads full_name instead of name
+    └── users/index.php      # columns follow the users schema
+database/
+└── pos_db.sql               # schema + sample data (database export)
+.env.example                 # template for the .env database settings
+```
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+## Requirements
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+- PHP 8.2+ with the `intl`, `mbstring`, and `mysqli` extensions
+- Composer
+- MySQL 8 or MariaDB 10.x (XAMPP or Laragon works)
 
-## Setup
+## Local setup
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+1. **Clone the project and install dependencies**
 
-## Important Change with index.php
+   ```bash
+   git clone https://github.com/Lexaxd123/paglastfa1.git
+   cd paglastfa1
+   composer install
+   ```
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+2. **Create the database.** Start MySQL. Then import the export with phpMyAdmin (Import tab → `database/pos_db.sql`) or from the terminal:
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+   ```bash
+   mysql -u root -p < database/pos_db.sql
+   ```
 
-**Please** read the user guide for a better explanation of how CI4 works!
+   This creates `pos_db` with the `customers` and `users` tables and 5 sample records in each.
 
-## Repository Management
+3. **Configure the environment.**
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+   ```bash
+   cp .env.example .env
+   ```
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+   Edit `.env` and set your MySQL credentials:
 
-## Server Requirements
+   ```ini
+   CI_ENVIRONMENT = development
+   app.baseURL = 'http://localhost:8080/'
 
-PHP version 8.2 or higher is required, with the following extensions installed:
+   database.default.hostname = localhost
+   database.default.database = pos_db
+   database.default.username = root
+   database.default.password =
+   database.default.DBDriver = MySQLi
+   database.default.port = 3306
+   ```
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+4. **Run the app.**
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - The end of life date for PHP 8.1 was December 31, 2025.
-> - If you are still using below PHP 8.2, you should upgrade immediately.
-> - The end of life date for PHP 8.2 will be December 31, 2026.
+   ```bash
+   php spark serve
+   ```
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+   Open <http://localhost:8080/customers> and <http://localhost:8080/users>.
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+## Deploying to InfinityFree
+
+The live site runs on InfinityFree. The whole project is uploaded into `htdocs/`, and the root `.htaccess` sends every request to `public/` while blocking direct access to `.env`, `composer.*`, `spark`, `.sql` files, and similar. The `.htaccess` files in `app/`, `tests/`, `writable/`, `vendor/`, and `database/` deny all web access. They use `mod_rewrite` instead of `Require all denied` / `Options` because InfinityFree's restricted `AllowOverride` rejects those directives with a 500 error.
+
+1. **Create the database.** In the InfinityFree control panel, open **MySQL Databases** and create one (for example `pos_db`). InfinityFree adds a prefix, so the full name looks like `if0_XXXXXXXX_pos_db`. Note the **MySQL hostname** (`sqlXXX.infinityfree.com`, *not* `localhost`), the username (`if0_XXXXXXXX`), and the password (your account password, shown in the control panel).
+2. **Import the tables.** Open phpMyAdmin from the control panel and select the new database. Comment out the `CREATE DATABASE` and `USE` lines in `database/pos_db.sql` (InfinityFree doesn't allow either), then import the file.
+3. **Upload the files.** Upload the project into `htdocs/` with the File Manager or FTP. Include the `vendor/` folder, because InfinityFree has no Composer. If you build it yourself, use `composer install --no-dev --optimize-autoloader`. Don't upload `.git/` or `tests/`.
+4. **Create `.env` on the server.** Create it directly in `htdocs/`. Don't commit it.
+
+   ```ini
+   CI_ENVIRONMENT = production
+   app.baseURL = 'https://your-subdomain.infinityfree.me/'
+
+   database.default.hostname = sqlXXX.infinityfree.com
+   database.default.database = if0_XXXXXXXX_pos_db
+   database.default.username = if0_XXXXXXXX
+   database.default.password = your_vpanel_password
+   database.default.DBDriver = MySQLi
+   database.default.port = 3306
+   ```
+
+5. Open `/customers` and `/users` on the live site to confirm the records load.
+
+InfinityFree's MySQL only accepts connections from its own web servers. You can't connect your local app to the hosted database; use phpMyAdmin to manage it instead.
+
+## Security notes
+
+- `.env` is listed in `.gitignore`, so real database credentials never reach GitHub. Commit `.env.example` instead.
+- Use `CI_ENVIRONMENT = production` on the live site. Development mode shows stack traces and the debug toolbar, which can expose file paths and database details.
+- Every value printed in a view goes through `esc()` to prevent XSS.
+- Models restrict writable columns with `$allowedFields`, which blocks mass-assignment of fields like `id`.
+- On the host, use a database user limited to this one database rather than an admin account.
+
+## Database schema
+
+```sql
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    created_at DATETIME NOT NULL
+);
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    full_name VARCHAR(100) NOT NULL,
+    created_at DATETIME NOT NULL
+);
+```
+
+## Links
+
+- GitHub: https://github.com/Lexaxd123/paglastfa1
+- Live site: https://morrispaglas.infinityfree.me/

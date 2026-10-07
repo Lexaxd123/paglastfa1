@@ -2,27 +2,16 @@
 
 namespace App\Controllers;
 
+use App\Models\UserModel;
+
 class Users extends BaseController
 {
     public function index()
     {
-        $data['users'] = [
-            [
-                'name'  => 'Admin User',
-                'email' => 'admin@example.com',
-                'role'  => 'Administrator',
-            ],
-            [
-                'name'  => 'Juan Dela Cruz',
-                'email' => 'juan@example.com',
-                'role'  => 'Cashier',
-            ],
-            [
-                'name'  => 'Maria Santos',
-                'email' => 'maria@example.com',
-                'role'  => 'Manager',
-            ],
-        ];
+        $userModel = new UserModel();
+
+        // Query Builder: SELECT * FROM users ORDER BY id ASC
+        $data['users'] = $userModel->orderBy('id', 'ASC')->findAll();
 
         return view('users/index', $data);
     }
