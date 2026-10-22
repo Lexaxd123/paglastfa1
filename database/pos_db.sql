@@ -1,5 +1,5 @@
 -- ------------------------------------------------------------------
--- Morris POS - Database export (IT0049 TFA2)
+-- Morris POS - Database export (IT0049 TFA3)
 -- Engine: MySQL 8 / MariaDB 10.x
 --
 -- Local (XAMPP / Laragon): run the whole file as-is.
@@ -35,6 +35,7 @@ CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     full_name VARCHAR(100) NOT NULL,
+    avatar VARCHAR(255) NULL,          -- TFA3: filename of the prepared avatar
     created_at DATETIME NOT NULL
 );
 
@@ -48,6 +49,7 @@ INSERT INTO customers (full_name, email, phone, created_at) VALUES
     ('Ada Wong',     'ada@example.com',          '09998887766', '2026-10-03 13:45:00'),
     ('Zyrah',        'zyrah@example.com',        '09001112233', '2026-10-04 16:20:00');
 
+-- avatar is NULL for the samples, so the listing shows the placeholder
 INSERT INTO users (username, full_name, created_at) VALUES
     ('admin',          'Admin User',      '2026-09-28 08:00:00'),
     ('juan.delacruz',  'Juan Dela Cruz',  '2026-09-29 08:30:00'),

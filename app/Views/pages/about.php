@@ -8,7 +8,7 @@
 
     <link
         rel="stylesheet"
-        href="<?= base_url('css/style.css') ?>"
+        href="<?= base_url('css/style.css') . '?v=' . filemtime(FCPATH . 'css/style.css') ?>"
     >
 </head>
 

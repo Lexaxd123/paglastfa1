@@ -1,0 +1,9 @@
+# TFA3: uploaded avatars are images only.
+# Anything that is not a .jpg/.jpeg/.png file (for example a .php script
+# someone managed to sneak in) is refused instead of being run or served.
+# Uses mod_rewrite because InfinityFree does not allow "Options" or
+# "php_flag" overrides.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule !\.(jpe?g|png)$ - [F,NC,L]
+</IfModule>

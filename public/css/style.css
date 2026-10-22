@@ -287,3 +287,133 @@ footer {
         min-width: 750px;
     }
 }
+/* ------------------------------------------------------------------
+   TFA3: forms, validation messages, and avatars
+   ------------------------------------------------------------------ */
+.form-container {
+    max-width: 640px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #a7f3d0;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.error-summary {
+    margin-bottom: 22px;
+    padding: 14px 18px;
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    background: #fee2e2;
+    color: #7f1d1d;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #d1fae5;
+    font-weight: bold;
+}
+
+.required {
+    color: #fca5a5;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 16px;
+}
+
+.form-group input:focus {
+    border-color: #34d399;
+    outline: none;
+}
+
+.form-group input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed rgba(167, 243, 208, 0.5);
+    border-radius: 8px;
+    color: #d1fae5;
+}
+
+.form-group.has-error input {
+    border-color: #f87171;
+}
+
+.field-error {
+    margin-top: 6px;
+    color: #fca5a5;
+    font-size: 14px;
+}
+
+.field-hint {
+    margin-top: 6px;
+    color: #a7f3d0;
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.button-secondary {
+    display: inline-block;
+    padding: 10px 16px;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    color: #a7f3d0;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.button-secondary:hover {
+    background: rgba(167, 243, 208, 0.12);
+}
+
+button.button {
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border: 2px solid #a7f3d0;
+    border-radius: 50%;
+    object-fit: cover;
+    vertical-align: middle;
+}
+
+.avatar-current {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.avatar-large {
+    width: 96px;
+    height: 96px;
+}

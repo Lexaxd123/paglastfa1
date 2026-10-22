@@ -1,7 +1,27 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Block direct web access to project files that sit next to (not inside)
+    # public/. The rewrite below only fires for paths that are not real files,
+    # so without this these would be served as-is (.env included). Uses
+    # mod_rewrite rather than Require/Deny so it still works on hosts with a
+    # restrictive AllowOverride that disallows AuthConfig/Limit directives.
+    RewriteRule ^(\.env(\..*)?|composer\.(json|lock)|\.gitignore|\.git.*|spark|preload\.php|builds|phpunit.*|.*\.(7z|zip|rar|sql|bak))$ - [F,L]
+
+    # The root URL has no path segment to append, so send it straight to the
+    # front controller. Without this it falls through to the rule below, which
+    # cannot match an empty path against a directory.
+    RewriteRule ^$ public/index.php [L]
+
+    # Anything that is not a real file or directory is served from public/.
+    #
+    # NOTE: the original file had a second, condition-less rule here
+    # (RewriteRule ^(.*)$ index.php/$1) copied from public/.htaccess. A
+    # RewriteCond only binds to the rule immediately after it, so that rule ran
+    # unconditionally and rewrote every existing file - and the bare root - to
+    # an index.php that does not exist at this level, producing a 500. It is
+    # removed deliberately; do not reinstate it.
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ public/$1 [L]
-    RewriteRule ^(.*)$ index.php/$1 [L]
 </IfModule>

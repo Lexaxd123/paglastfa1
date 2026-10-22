@@ -1,34 +1,71 @@
 # Morris POS (CodeIgniter 4 + MySQL)
 
-IT0049 Web System Technologies, **TFA2: From Arrays to a Real Database**.
+IT0049 Web System Technologies, **TFA3: Forms, Validation, and File Upload**.
 
-TFA1 stored Customers and Users in static PHP arrays. TFA2 moves that data into a MySQL database. Each page now reads its records through a CodeIgniter **Model** with Query Builder (`findAll()`), not raw SQL.
+- **TFA1** showed Customers and Users from static PHP arrays.
+- **TFA2** moved that data into MySQL, read through CodeIgniter Models.
+- **TFA3** adds validated **New** and **Edit** forms for both, plus a **profile-picture upload** for users. Each upload is checked, turned into a 200 × 200 thumbnail, and saved in `public/uploads/avatars/`; only its filename goes into the database.
 
 ## Pages
 
-| Route        | Controller           | Data source                           |
-|--------------|----------------------|---------------------------------------|
-| `/`          | `Pages::index`       | static                                |
-| `/about`     | `Pages::about`       | static                                |
-| `/customers` | `Customers::index`   | `CustomerModel` → `customers` table   |
-| `/users`     | `Users::index`       | `UserModel` → `users` table           |
+| Method | Route                     | Controller            | What it does                                   |
+|--------|---------------------------|-----------------------|------------------------------------------------|
+| GET    | `/`                       | `Pages::index`        | Home page                                      |
+| GET    | `/about`                  | `Pages::about`        | About page                                     |
+| GET    | `/customers`              | `Customers::index`    | Customer list with **Add** / **Edit** buttons  |
+| GET    | `/customers/new`          | `Customers::new`      | Empty New Customer form                        |
+| POST   | `/customers/create`       | `Customers::create`   | Validates, then inserts                        |
+| GET    | `/customers/edit/{id}`    | `Customers::edit`     | Edit form pre-filled from the database         |
+| POST   | `/customers/update/{id}`  | `Customers::update`   | Validates, then updates                        |
+| GET    | `/users`                  | `Users::index`        | User list with avatars (placeholder if none)   |
+| GET    | `/users/new`              | `Users::new`          | Empty New User form                            |
+| POST   | `/users/create`           | `Users::create`       | Validates (unique username), then inserts      |
+| GET    | `/users/edit/{id}`        | `Users::edit`         | Edit form with profile-picture upload          |
+| POST   | `/users/update/{id}`      | `Users::update`       | Validates fields + image, prepares avatar, updates |
 
-## Project structure (files changed in TFA2)
+## Validation rules
+
+| Form      | Field          | Rules                                                                 |
+|-----------|----------------|-----------------------------------------------------------------------|
+| Customer  | Full Name      | required, 2–100 characters                                            |
+| Customer  | Email Address  | required, valid email, max 100                                        |
+| Customer  | Phone Number   | optional, max 20, digits / spaces / `+ - ( )` only                    |
+| User      | Username       | required, 3–50, letters / numbers / `. _ -`, **unique** (`is_unique`) |
+| User      | Full Name      | required, 2–100 characters                                            |
+| User edit | Profile Picture| optional; real image (`is_image`), JPG/PNG by content and extension, max 2MB |
+
+When a form fails validation, it is shown again with a message under each wrong field **and everything the user typed is kept**.
+
+## Project structure (files added or changed in TFA3)
 
 ```
 app/
+├── Config/
+│   ├── Filters.php                 # CSRF protection turned on for every POST
+│   └── Routes.php                  # new / create / edit / update routes
 ├── Controllers/
-│   ├── Customers.php        # now uses CustomerModel->findAll()
-│   └── Users.php            # now uses UserModel->findAll()
+│   ├── Customers.php               # index, new, create, edit, update
+│   └── Users.php                   # same + avatar validation and preparation
+├── Database/Migrations/
+│   └── ..._AddFieldsToUsers.php    # adds users.avatar (same as tfa3_add_avatar.sql)
 ├── Models/
-│   ├── CustomerModel.php    # wraps the customers table
-│   └── UserModel.php        # wraps the users table
+│   ├── CustomerModel.php
+│   └── UserModel.php               # avatar added to allowedFields
 └── Views/
-    ├── customers/index.php  # reads full_name instead of name
-    └── users/index.php      # columns follow the users schema
+    ├── partials/navbar.php         # shared navigation bar
+    ├── customers/index.php         # Add / Edit buttons, Date Added column
+    ├── customers/form.php          # one form for New and Edit
+    ├── users/index.php             # Avatar column
+    └── users/form.php              # one form for New and Edit (+ upload on Edit)
+public/
+├── css/style.css                   # form, error, and avatar styles
+├── images/avatar-placeholder.svg   # shown when a user has no avatar
+└── uploads/
+    ├── .htaccess                   # only .jpg/.jpeg/.png can be served from here
+    └── avatars/                    # prepared avatars (not committed to Git)
 database/
-└── pos_db.sql               # schema + sample data (database export)
-.env.example                 # template for the .env database settings
+├── pos_db.sql                      # full schema + sample data (fresh install)
+└── tfa3_add_avatar.sql             # upgrade script for an existing TFA2 database
 ```
 
 ## Requirements
@@ -53,7 +90,15 @@ database/
    mysql -u root -p < database/pos_db.sql
    ```
 
-   This creates `pos_db` with the `customers` and `users` tables and 5 sample records in each.
+   This creates `pos_db` with the `customers` and `users` tables (including `users.avatar`) and 5 sample records in each.
+
+   **Already have the TFA2 database?** Run only the upgrade script instead, so your records are kept:
+
+   ```bash
+   mysql -u root -p pos_db < database/tfa3_add_avatar.sql
+   ```
+
+   (or `php spark migrate`, which runs the same change.)
 
 3. **Configure the environment.**
 
@@ -106,15 +151,21 @@ The live site runs on InfinityFree. The whole project is uploaded into `htdocs/`
 
 5. Open `/customers` and `/users` on the live site to confirm the records load.
 
+**Upgrading the live site from TFA2 to TFA3:** in phpMyAdmin, import `database/tfa3_add_avatar.sql` (adds the `avatar` column, keeps existing records), then upload the changed files listed in *Project structure* above. The `public/uploads/avatars/` folder must stay writable so PHP can save the prepared avatars.
+
 InfinityFree's MySQL only accepts connections from its own web servers. You can't connect your local app to the hosted database; use phpMyAdmin to manage it instead.
 
 ## Security notes
 
-- `.env` is listed in `.gitignore`, so real database credentials never reach GitHub. Commit `.env.example` instead.
-- Use `CI_ENVIRONMENT = production` on the live site. Development mode shows stack traces and the debug toolbar, which can expose file paths and database details.
-- Every value printed in a view goes through `esc()` to prevent XSS.
-- Models restrict writable columns with `$allowedFields`, which blocks mass-assignment of fields like `id`.
-- On the host, use a database user limited to this one database rather than an admin account.
+- **Validation on the server.** Every rule runs in PHP, so it can't be skipped by editing the page in the browser. The forms read only the fields they expect, and `$allowedFields` in each Model stops anything else (like `id` or `created_at`) from being written.
+- **CSRF protection** is on for every POST (`app/Config/Filters.php`). Each form includes `csrf_field()`, so a form submitted from another website is refused and nothing is saved (in production CodeIgniter redirects back; in development it shows a 403).
+- **Output escaping.** Everything printed in a view goes through `esc()`, so a name like `<script>…</script>` is shown as text, not run.
+- **Uploads are checked by content, not just by name.** `is_image` and `mime_in` look inside the file, and `ext_in` checks the name; a renamed `.php` file is rejected.
+- **Uploads are re-drawn.** The original file is never kept. The Image service draws a fresh 200 × 200 picture with a random filename, which also drops hidden extras like GPS data or code tucked into the file.
+- **The uploads folder can't run code.** `public/uploads/.htaccess` refuses anything that isn't a `.jpg`, `.jpeg`, or `.png`.
+- `.env` is listed in `.gitignore`, so real database credentials never reach GitHub. Use `CI_ENVIRONMENT = production` on the live site so error pages don't reveal file paths or database details.
+
+> **Note for GitHub's "Upload files" button:** it skips files whose names start with a dot (`.htaccess`, `.env.example`, `.gitignore`). Use Git, GitHub Desktop, or *Add file → Create new file* to add those, or the repository will not match the hosted site.
 
 ## Database schema
 
@@ -131,6 +182,7 @@ CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     full_name VARCHAR(100) NOT NULL,
+    avatar VARCHAR(255) NULL,      -- TFA3: filename of the prepared avatar
     created_at DATETIME NOT NULL
 );
 ```

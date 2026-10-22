@@ -4,32 +4,27 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
+/**
+ * TFA3: adds the avatar column to the users table.
+ *
+ * Only the filename of the prepared (resized) avatar is stored here;
+ * the image file itself lives in public/uploads/avatars/.
+ *
+ * Equivalent SQL: database/tfa3_add_avatar.sql
+ */
 class AddFieldsToUsers extends Migration
 {
     public function up()
     {
-        $fields = [];
-
-        if (! $this->db->fieldExists('full_name', 'users')) {
-            $fields['full_name'] = [
-                'type'       => 'VARCHAR',
-                'constraint' => 150,
-                'null'       => false,
-                'after'      => 'username',
-            ];
-        }
-
         if (! $this->db->fieldExists('avatar', 'users')) {
-            $fields['avatar'] = [
-                'type'       => 'VARCHAR',
-                'constraint' => 255,
-                'null'       => true,
-                'after'      => 'status',
-            ];
-        }
-
-        if (! empty($fields)) {
-            $this->forge->addColumn('users', $fields);
+            $this->forge->addColumn('users', [
+                'avatar' => [
+                    'type'       => 'VARCHAR',
+                    'constraint' => 255,
+                    'null'       => true,
+                    'after'      => 'full_name',
+                ],
+            ]);
         }
     }
 
@@ -37,10 +32,6 @@ class AddFieldsToUsers extends Migration
     {
         if ($this->db->fieldExists('avatar', 'users')) {
             $this->forge->dropColumn('users', 'avatar');
-        }
-
-        if ($this->db->fieldExists('full_name', 'users')) {
-            $this->forge->dropColumn('users', 'full_name');
         }
     }
 }

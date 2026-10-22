@@ -6,141 +6,79 @@
 
     <title>Customers | Morris POS</title>
 
-    <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/style.css') . '?v=' . filemtime(FCPATH . 'css/style.css') ?>">
 </head>
 
 <body>
+    <?= view('partials/navbar', ['active' => 'customers']) ?>
 
-<nav class="navbar">
-    <a class="logo" href="<?= site_url('/') ?>">
-        🛒 Morris POS
-    </a>
+    <main class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">👥 Customer List</h1>
 
-    <ul class="nav-links">
-        <li>
-            <a href="<?= site_url('/') ?>">Home</a>
-        </li>
+                <p class="page-description">
+                    View and manage customer names, email addresses, and phone numbers.
+                </p>
+            </div>
 
-        <li>
-            <a href="<?= site_url('about') ?>">About</a>
-        </li>
-
-        <li>
-            <a class="active" href="<?= site_url('customers') ?>">
-                Customers
-            </a>
-        </li>
-
-        <li>
-            <a href="<?= site_url('users') ?>">Users</a>
-        </li>
-    </ul>
-</nav>
-
-<main class="container">
-
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">👥 Customer List</h1>
-
-            <p class="page-description">
-                View and manage customer names, email addresses, and phone numbers.
-            </p>
+            <a class="button" href="<?= site_url('customers/new') ?>">➕ Add Customer</a>
         </div>
 
-        <a class="button" href="<?= site_url('customers/new') ?>">
-            ➕ Add Customer
-        </a>
-    </div>
+        <?php if (session()->getFlashdata('success')): ?>
+            <div class="success-message">
+                <?= esc(session()->getFlashdata('success')) ?>
+            </div>
+        <?php endif; ?>
 
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="success-message">
-            <?= esc(session()->getFlashdata('success')) ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if (! empty($customers)): ?>
-
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Customer Name</th>
-                        <th>Email Address</th>
-                        <th>Phone Number</th>
-                        <th>Date Added</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <?php foreach ($customers as $number => $customer): ?>
-
-                        <?php
-                            $customerName = $customer['full_name']
-                                ?? $customer['name']
-                                ?? '';
-
-                            $phoneNumber = $customer['phone']
-                                ?? $customer['phone_number']
-                                ?? '';
-                        ?>
-
+        <?php if (! empty($customers)): ?>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
                         <tr>
-                            <td>
-                                <?= $number + 1 ?>
-                            </td>
-
-                            <td>
-                                <?= esc($customerName) ?>
-                            </td>
-
-                            <td>
-                                <a
-                                    class="email-link"
-                                    href="mailto:<?= esc($customer['email'] ?? '') ?>"
-                                >
-                                    <?= esc($customer['email'] ?? '') ?>
-                                </a>
-                            </td>
-
-                            <td>
-                                <?= esc($phoneNumber) ?>
-                            </td>
-
-                            <td>
-                                <?= esc($customer['date_added'] ?? 'Not available') ?>
-                            </td>
-
-                            <td>
-                                <a
-                                    class="edit-button"
-                                    href="<?= site_url('customers/edit/' . $customer['customer_id']) ?>"
-                                >
-                                    ✏️ Edit
-                                </a>
-                            </td>
+                            <th>#</th>
+                            <th>Customer Name</th>
+                            <th>Email Address</th>
+                            <th>Phone Number</th>
+                            <th>Date Added</th>
+                            <th>Action</th>
                         </tr>
+                    </thead>
 
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+                    <tbody>
+                        <?php foreach ($customers as $number => $customer): ?>
+                            <tr>
+                                <td><?= $number + 1 ?></td>
 
-    <?php else: ?>
+                                <td><?= esc($customer['full_name']) ?></td>
 
-        <p class="empty-message">
-            No customers are currently available.
-        </p>
+                                <td>
+                                    <a class="email-link" href="mailto:<?= esc($customer['email'], 'attr') ?>">
+                                        <?= esc($customer['email']) ?>
+                                    </a>
+                                </td>
 
-    <?php endif; ?>
+                                <td><?= esc($customer['phone'] ?: '—') ?></td>
 
-</main>
+                                <td><?= esc(date('M d, Y', strtotime($customer['created_at']))) ?></td>
 
-<footer>
-    &copy; <?= date('Y') ?> Morris POS System
-</footer>
+                                <td>
+                                    <a class="edit-button" href="<?= site_url('customers/edit/' . $customer['id']) ?>">
+                                        ✏️ Edit
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <p class="empty-message">No customers are currently available.</p>
+        <?php endif; ?>
+    </main>
 
+    <footer>
+        &copy; <?= date('Y') ?> Morris POS System
+    </footer>
 </body>
 </html>

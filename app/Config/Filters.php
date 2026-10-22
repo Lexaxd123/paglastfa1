@@ -73,7 +73,9 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             // 'honeypot',
-            // 'csrf',
+            // TFA3: every POST form must carry a valid CSRF token
+            // (forms add it with csrf_field()).
+            'csrf',
             // 'invalidchars',
         ],
         'after' => [

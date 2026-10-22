@@ -124,3 +124,9 @@ _modules/*
 
 /results/
 /phpunit.xml
+
+#-------------------------
+# TFA3: user-uploaded avatars (keep the folder, not the images)
+#-------------------------
+/public/uploads/avatars/*
+!/public/uploads/avatars/index.html
