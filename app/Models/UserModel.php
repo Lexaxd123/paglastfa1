@@ -16,9 +16,9 @@ class UserModel extends Model
     protected $returnType     = 'array';
     protected $useSoftDeletes = false;
 
-    // avatar stores only the FILENAME of the prepared image,
-    // never the image itself.
-    protected $allowedFields = ['username', 'full_name', 'avatar'];
+    // avatar stores only the FILENAME of the prepared image, never the image.
+    // password stores only a password_hash() value, never the real password.
+    protected $allowedFields = ['username', 'full_name', 'avatar', 'password'];
 
     // created_at is filled automatically; the schema has no updated_at.
     protected $useTimestamps = true;

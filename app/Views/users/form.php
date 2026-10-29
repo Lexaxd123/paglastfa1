@@ -66,6 +66,27 @@ $avatarUrl = ! empty($user['avatar'])
                 <?= $fieldError('full_name') ?>
             </div>
 
+            <div class="form-group <?= isset($errors['password']) ? 'has-error' : '' ?>">
+                <label for="password">
+                    <?= $isEdit ? 'New Password' : 'Password' ?>
+                    <?php if (! $isEdit): ?><span class="required">*</span><?php endif; ?>
+                </label>
+                <input type="password" id="password" name="password" maxlength="72" autocomplete="new-password">
+                <?= $fieldError('password') ?>
+                <p class="field-hint">
+                    <?= $isEdit ? 'Leave empty to keep the current password. ' : '' ?>8 to 72 characters. It is stored as a hash, never as plain text.
+                </p>
+            </div>
+
+            <div class="form-group <?= isset($errors['password_confirm']) ? 'has-error' : '' ?>">
+                <label for="password_confirm">
+                    Confirm Password
+                    <?php if (! $isEdit): ?><span class="required">*</span><?php endif; ?>
+                </label>
+                <input type="password" id="password_confirm" name="password_confirm" maxlength="72" autocomplete="new-password">
+                <?= $fieldError('password_confirm') ?>
+            </div>
+
             <?php if ($isEdit): ?>
                 <div class="form-group <?= isset($errors['avatar']) ? 'has-error' : '' ?>">
                     <label for="avatar">Profile Picture</label>

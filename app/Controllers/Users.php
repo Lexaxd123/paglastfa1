@@ -52,13 +52,17 @@ class Users extends BaseController
     {
         $data = $this->postedUser();
 
-        if (! $this->validateData($data, $this->rules())) {
+        // TFA4: a new account needs a password, otherwise nobody could log in as it.
+        if (! $this->validateData($data + $this->postedPasswords(), $this->rules(null, true))) {
             return view('users/form', [
                 'title'  => 'Add New User',
-                'user'   => $data,
+                'user'   => $data, // passwords are never sent back to the form
                 'errors' => $this->validator->getErrors(),
             ]);
         }
+
+        // Only the hash is stored.
+        $data['password'] = password_hash($this->postedPasswords()['password'], PASSWORD_DEFAULT);
 
         $this->userModel->insert($data);
 
@@ -87,7 +91,10 @@ class Users extends BaseController
         $data = $this->postedUser();
 
         // Text fields: is_unique ignores this user's own row.
-        $rules = $this->rules($id);
+        // TFA4: the password is optional on edit (empty = keep the current one).
+        $passwords = $this->postedPasswords();
+        $changePwd = $passwords['password'] !== '';
+        $rules     = $this->rules($id, $changePwd);
 
         // Avatar is optional: only validate it if a file was actually chosen.
         $avatar = $this->request->getFile('avatar');
@@ -110,7 +117,7 @@ class Users extends BaseController
             ];
         }
 
-        if (! $this->validateData($data, $rules)) {
+        if (! $this->validateData($data + $passwords, $rules)) {
             return view('users/form', [
                 // Keep the current avatar visible while showing the typed values.
                 'title'  => 'Edit User',
@@ -135,6 +142,10 @@ class Users extends BaseController
             $this->deleteAvatarFile($user['avatar']);
         }
 
+        if ($changePwd) {
+            $data['password'] = password_hash($passwords['password'], PASSWORD_DEFAULT);
+        }
+
         $this->userModel->update($id, $data);
 
         return redirect()->to('/users')
@@ -145,13 +156,13 @@ class Users extends BaseController
      * Validation rules for the text fields.
      * On edit, pass the user's id so is_unique skips their own row.
      */
-    private function rules(?int $ignoreId = null): array
+    private function rules(?int $ignoreId = null, bool $withPassword = false): array
     {
         $unique = $ignoreId === null
             ? 'is_unique[users.username]'
             : 'is_unique[users.username,id,' . $ignoreId . ']';
 
-        return [
+        $rules = [
             'username' => [
                 'label'  => 'Username',
                 'rules'  => 'required|min_length[3]|max_length[50]|regex_match[/^[A-Za-z0-9._-]+$/]|' . $unique,
@@ -164,6 +175,34 @@ class Users extends BaseController
                 'label' => 'Full Name',
                 'rules' => 'required|min_length[2]|max_length[100]',
             ],
+        ];
+
+        if ($withPassword) {
+            // 72 = bcrypt only uses the first 72 bytes, so longer input would be silently cut.
+            $rules['password'] = [
+                'label'  => 'Password',
+                'rules'  => 'required|min_length[8]|max_length[72]',
+                'errors' => ['min_length' => 'The {field} must be at least 8 characters long.'],
+            ];
+            $rules['password_confirm'] = [
+                'label'  => 'Confirm Password',
+                'rules'  => 'required|matches[password]',
+                'errors' => ['matches' => 'The two passwords do not match.'],
+            ];
+        }
+
+        return $rules;
+    }
+
+    /**
+     * TFA4: the raw password fields. Kept apart from postedUser() so they can
+     * never end up in the array that is saved or shown again in the form.
+     */
+    private function postedPasswords(): array
+    {
+        return [
+            'password'         => (string) $this->request->getPost('password'),
+            'password_confirm' => (string) $this->request->getPost('password_confirm'),
         ];
     }
 

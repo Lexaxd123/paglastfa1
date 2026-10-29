@@ -64,6 +64,14 @@
             transition: 0.25s ease;
         }
 
+        .nav-user span { color: #a7f3d0; padding: 10px 6px; display: inline-block; }
+        .nav-logout { margin: 0; }
+        .nav-logout button {
+            padding: 10px 16px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px;
+            background: transparent; color: #ecfdf5; font: inherit; cursor: pointer; transition: 0.25s;
+        }
+        .nav-logout button:hover { background: #10b981; color: #022c22; }
+
         .nav-links a:hover,
         .nav-links a.active {
             background: #10b981;
@@ -244,6 +252,8 @@
             <li>
                 <a href="<?= site_url('users') ?>">Users</a>
             </li>
+        
+            <?= view('partials/auth_nav', ['active' => '']) ?>
         </ul>
     </nav>
 

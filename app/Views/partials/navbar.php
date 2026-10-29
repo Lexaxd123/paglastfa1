@@ -21,5 +21,7 @@ $links = [
                 <a <?= $key === $active ? 'class="active"' : '' ?> href="<?= $url ?>"><?= esc($label) ?></a>
             </li>
         <?php endforeach; ?>
+
+        <?= view('partials/auth_nav', ['active' => $active]) ?>
     </ul>
 </nav>

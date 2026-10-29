@@ -331,7 +331,8 @@ footer {
 
 .form-group input[type="text"],
 .form-group input[type="email"],
-.form-group input[type="tel"] {
+.form-group input[type="tel"],
+.form-group input[type="password"] {
     width: 100%;
     padding: 12px 14px;
     border: 2px solid transparent;
@@ -416,4 +417,41 @@ button.button {
 .avatar-large {
     width: 96px;
     height: 96px;
+}
+
+
+/* ---------- TFA4: login state in the navbar + login page ---------- */
+.nav-links {
+    align-items: center;
+}
+
+.nav-user span {
+    display: inline-block;
+    padding: 10px 6px;
+    color: #a7f3d0;
+}
+
+.nav-logout {
+    margin: 0;
+}
+
+.nav-logout button {
+    padding: 10px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: transparent;
+    color: #ecfdf5;
+    font: inherit;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.nav-logout button:hover {
+    background: #10b981;
+    color: #022c22;
+    transform: translateY(-2px);
+}
+
+.login-container {
+    max-width: 460px;
 }

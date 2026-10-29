@@ -32,6 +32,8 @@
             </li>
 
             <li><a href="<?= site_url('users') ?>">Users</a></li>
+
+            <?= view('partials/auth_nav', ['active' => '']) ?>
         </ul>
     </nav>
 
